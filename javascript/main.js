@@ -1,18 +1,51 @@
 var m = null;   // m = MIDIAccess object for you to make calls on
 var i = null;   // i = MIDIInput
 
-MidiEvent = (function (){
+MidiEvent = (function() {
   function MidiEvent(event){
     this.type = event.data[0];
-    this.note = event.data[1];
+    this.note = new Note(event.data[1]);
     this.velocity = event.data[2];
   }
 
-  MidiEvent.prototype.masterKeyPosition = function(){
-    this.note % 12;
+  MidiEvent.prototype.masterKeyPosition = function() {
+    return this.note % 12;
   };
 
   return MidiEvent;
+})();
+
+Note = (function() {
+  function Note(num) {
+    this.num = num;
+  }
+
+  Note.prototype.position = function() {
+    return this.num % 12;
+  };
+
+  Note.prototype.name = function() {
+    var _name;
+
+    switch (this.position()) {
+      case 0: _name = 'C'; break;
+      case 1: _name = 'C#'; break;
+      case 2: _name = 'D'; break;
+      case 3: _name = 'Eb'; break;
+      case 4: _name = 'E'; break;
+      case 5: _name = 'F'; break;
+      case 6: _name = 'F#'; break;
+      case 7: _name = 'G'; break;
+      case 8: _name = 'Ab'; break;
+      case 9: _name = 'A'; break;
+      case 10: _name = 'Bb'; break;
+      case 11: _name = 'B'; break;
+    }
+
+    return _name;
+  }
+
+  return Note;
 })();
 
 setTimeout(function(){ navigator.requestMIDIAccess(success, error) }, 200);
@@ -41,8 +74,8 @@ function success(access) {
 
     var event = new MidiEvent(_event);
     // Check for double key downs
-    if(keys_down[event.note] !== event.velocity){
-      keys_down[event.note] = event.velocity;
+    if(keys_down[event.note.num] !== event.velocity){
+      keys_down[event.note.num] = event.velocity;
       update_master_key(event);
     }
   }
@@ -55,15 +88,15 @@ function error(access) {
 function update_master_key(event){
   if(!is_same_note_down_elsewhere(event.note)){
     if(is_note_up(event)){
-      master_key[event.note%12].data("note", "up")
+      master_key[event.note.position()].data("note", "up")
                                   .attr("opacity", 0.35)
                                   .g.remove();
 
     } else {
-      master_key[event.note%12].g = master_key[event.note%12]
-                                      .data("note", "down")
-                                      .attr("opacity", 1.0)
-                                      .glow({color: "#FFF"});
+      master_key[event.note.position()].g = master_key[event.note.position()]
+                                              .data("note", "down")
+                                              .attr("opacity", 1.0)
+                                              .glow({color: "#FFF"});
     }
   }
 
@@ -89,8 +122,8 @@ function is_note_up(event){
 }
 
 function is_same_note_down_elsewhere(note){
-  for(var i=note%12; i<88; i=i+12){
-    if(keys_down[i] > 0 && i != note){
+  for(var i=note.position(); i<88; i=i+12){
+    if(keys_down[i] > 0 && i != note.num){
       return true;
     }
   }
@@ -105,7 +138,7 @@ function interval_index_mapper(note_1, note_2){
 }
 
 function interval_color(note_1, note_2){
-  var dist = Math.abs(note_1%12 - note_2%12);
+  var dist = Math.abs(note_1 - note_2);
   if(dist > 6) dist = 12 - dist;
   var colors = ["#bf001c",
                 "#bf5600",
