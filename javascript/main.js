@@ -5,6 +5,7 @@ setTimeout(function(){ navigator.requestMIDIAccess(success, error) }, 200);
 
 //Globals (I know...)
 var keys_down = new Array(88).join('0').split('').map(parseFloat)
+var intervals = new Array(66).join('0').split('').map(parseFloat)
 var master_key = [0,0,0,0,0,0,0,0,0,0,0,0];
 
 function success(access) {
@@ -57,6 +58,25 @@ setTimeout( function game(){
   var RADIUS = 150;
   var NODE_COLOR = "#1090B3";
   var mdna = Raphael(50, 50, WIDTH, HEIGHT);
+
+  // Create the array of interval lines
+  var interval_index = 0;
+  for(var i=0; i<12; i++){
+    for(var j=0; j<i; j++){
+      x = RADIUS*Math.sin(2*Math.PI*(i/12)) + WIDTH/2;
+      y = -RADIUS*Math.cos(2*Math.PI*(i/12)) + HEIGHT/2;
+      x2 = RADIUS*Math.sin(2*Math.PI*(j/12)) + WIDTH/2;
+      y2 = -RADIUS*Math.cos(2*Math.PI*(j/12)) + HEIGHT/2;
+      intervals[interval_index] = mdna.path("M"+x+","+y+"L"+x2+","+y2);
+      intervals[interval_index].attr({fill: NODE_COLOR,
+                   stroke: "#ffffff",
+                   "stroke-width": 3,
+                   opacity: .2
+      });
+    }
+  }
+
+  // Create the array of 12 note nodes
   master_key.forEach(function(ele, idx, arr){
     x = RADIUS*Math.sin(2*Math.PI*(idx/12));
     y = -RADIUS*Math.cos(2*Math.PI*(idx/12));
@@ -67,4 +87,5 @@ setTimeout( function game(){
                    opacity: .5
     });
   });
+
 }, 300);
