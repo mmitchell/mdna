@@ -28,12 +28,14 @@ function success(access) {
 
 function update_master_key(event){
   if(!is_same_note_down_elsewhere(event.data[1])){
-    if(event.data[2] === 0){
+    if(is_note_up(event)){
+      console.log("up");
       master_key[event.data[1]%12].data("note", "up")
-                                  .attr("opacity", 0.5)
+                                  .attr("opacity", 0.35)
                                   .g.remove();
 
     } else {
+      console.log("down");
       master_key[event.data[1]%12].g = master_key[event.data[1]%12]
                                       .data("note", "down")
                                       .attr("opacity", 1.0)
@@ -44,14 +46,22 @@ function update_master_key(event){
   var interval_index = 0;
   for(var i=0; i<12; i++){
     for(var j=0; j<i; j++){
-      intervals[interval_index].attr('opacity', 0.2);
+      intervals[interval_index].attr({opacity: 0.15, stroke: "#ffffff"});
       if(master_key[i].data("note") === "down" && master_key[j].data("note") === "down"){
-        intervals[interval_index].attr('opacity', 1.0);
+        intervals[interval_index].attr({opacity: 1.0, stroke: interval_color(i,j)});
       }
       interval_index++;
     }
   }
+}
 
+// Not all midi-keyboards adhere to the spec;
+// some use the proper keyup command while others
+// use a keydown with zero velocity to mean keyup.
+function is_note_up(event){
+  if(event.data[2] === 0) return true; // Velocity is zero
+  if(event.data[0] >= 128 && event.data[0] <= 143) return true; // Note-off/keyup command given
+  return false; // Probably a keydown
 }
 
 function interval_index_mapper(note_1, note_2){
@@ -59,6 +69,18 @@ function interval_index_mapper(note_1, note_2){
     return note_1*12 + note_2;
   }
   return note_2*12 + note_1;
+}
+
+function interval_color(note_1, note_2){
+  var dist = Math.abs(note_1%12 - note_2%12);
+  if(dist > 6) dist = 12 - dist;
+  var colors = ["#bf001c",
+                "#bf5600",
+                "#bfac00",
+                "#00bf85",
+                "#00a2bf",
+                "#5f00bf"]
+  return colors[dist-1];
 }
 
 function is_same_note_down_elsewhere(note){
@@ -93,7 +115,7 @@ setTimeout( function game(){
       intervals[interval_index].attr({fill: NODE_COLOR,
                    stroke: "#ffffff",
                    "stroke-width": 3,
-                   opacity: 0.2
+                   opacity: 0.15
       });
       interval_index++;
     }
@@ -108,7 +130,7 @@ setTimeout( function game(){
             .attr({fill: NODE_COLOR,
                    stroke: "#ffffff",
                    "stroke-width": 6,
-                   opacity: 0.5
+                   opacity: 0.35
     });
   });
 
