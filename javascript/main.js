@@ -20,22 +20,22 @@ function success(access) {
   i = m.getInput(inputs[0]);
   i.onmessage = function (event) {
     output.send( event.data );
-    keys_down[event.data[1]] = event.data[2];
-    update_master_key(event);
+    // Check for double key downs
+    if(keys_down[event.data[1]] !== event.data[2]){
+      keys_down[event.data[1]] = event.data[2];
+      update_master_key(event);
+    }
   }
-
 }
 
 function update_master_key(event){
   if(!is_same_note_down_elsewhere(event.data[1])){
     if(is_note_up(event)){
-      console.log("up");
       master_key[event.data[1]%12].data("note", "up")
                                   .attr("opacity", 0.35)
                                   .g.remove();
 
     } else {
-      console.log("down");
       master_key[event.data[1]%12].g = master_key[event.data[1]%12]
                                       .data("note", "down")
                                       .attr("opacity", 1.0)
