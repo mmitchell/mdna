@@ -1,0 +1,13 @@
+{
+  "main": "src/main",
+
+  "css": "css/style",
+
+  "public": "public",
+
+  "paths": ["src"],
+
+  "libs": [],
+
+  "dependencies": ["raphael"]
+}
