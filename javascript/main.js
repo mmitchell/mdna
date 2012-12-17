@@ -21,9 +21,9 @@ function success(access) {
     output.send( event.data );
     keys_down[event.data[1]] = event.data[2];
     if(event.data[2] === 0){
-      master_key[event.data[1]%12].attr("fill", "#f00");
+      master_key[event.data[1]%12].attr("opacity", 0.5);
     } else {
-      master_key[event.data[1]%12].attr("fill", "#fff");
+      master_key[event.data[1]%12].attr("opacity", 1.0);
     }
   }
 
@@ -34,13 +34,18 @@ function error(access) {
 }
 
 setTimeout( function game(){
-  var mdna = Raphael(50, 50, 800, 800);
-  var RADIUS = 100;
+  var WIDTH = 900;
+  var HEIGHT = 500;
+  var RADIUS = 150;
+  var mdna = Raphael(50, 50, WIDTH, HEIGHT);
   master_key.forEach(function(ele, idx, arr){
     x = RADIUS*Math.sin(2*Math.PI*(idx/12));
     y = -RADIUS*Math.cos(2*Math.PI*(idx/12));
-    arr[idx] = mdna.circle(x + 150, y + 150, 10);
-    arr[idx].attr("fill", "#f00");
-    arr[idx].attr("stroke", "#000");
+    arr[idx] = mdna.circle(x + WIDTH/2, y + HEIGHT/2, 20);
+    arr[idx].attr({fill: "#1090B3",
+                   stroke: "#ffffff",
+                   "stroke-width": 6,
+                   opacity: .5
+    });
   });
 }, 300);
