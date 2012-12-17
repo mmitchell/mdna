@@ -1,0 +1,9 @@
+{
+  "name": "mdna",
+  "version": "0.0.1",
+  "private": "true",
+  "dependencies": {
+    "grunt": "~> 0.4.0a",
+    "grunt-contrib": "~> 0.3.0"
+  }
+}
