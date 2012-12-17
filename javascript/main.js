@@ -29,14 +29,36 @@ function success(access) {
 function update_master_key(event){
   if(!is_same_note_down_elsewhere(event.data[1])){
     if(event.data[2] === 0){
-      master_key[event.data[1]%12].attr("opacity", 0.5)
+      master_key[event.data[1]%12].data("note", "up")
+                                  .attr("opacity", 0.5)
                                   .g.remove();
+
     } else {
       master_key[event.data[1]%12].g = master_key[event.data[1]%12]
+                                      .data("note", "down")
                                       .attr("opacity", 1.0)
                                       .glow({color: "#FFF"});
     }
   }
+
+  var interval_index = 0;
+  for(var i=0; i<12; i++){
+    for(var j=0; j<i; j++){
+      intervals[interval_index].attr('opacity', 0.2);
+      if(master_key[i].data("note") === "down" && master_key[j].data("note") === "down"){
+        intervals[interval_index].attr('opacity', 1.0);
+      }
+      interval_index++;
+    }
+  }
+
+}
+
+function interval_index_mapper(note_1, note_2){
+  if(note_1 > note_2){
+    return note_1*12 + note_2;
+  }
+  return note_2*12 + note_1;
 }
 
 function is_same_note_down_elsewhere(note){
@@ -71,8 +93,9 @@ setTimeout( function game(){
       intervals[interval_index].attr({fill: NODE_COLOR,
                    stroke: "#ffffff",
                    "stroke-width": 3,
-                   opacity: .2
+                   opacity: 0.2
       });
+      interval_index++;
     }
   }
 
@@ -81,10 +104,11 @@ setTimeout( function game(){
     x = RADIUS*Math.sin(2*Math.PI*(idx/12));
     y = -RADIUS*Math.cos(2*Math.PI*(idx/12));
     arr[idx] = mdna.circle(x + WIDTH/2, y + HEIGHT/2, 20);
-    arr[idx].attr({fill: NODE_COLOR,
+    arr[idx].data("note", "up")
+            .attr({fill: NODE_COLOR,
                    stroke: "#ffffff",
                    "stroke-width": 6,
-                   opacity: .5
+                   opacity: 0.5
     });
   });
 
