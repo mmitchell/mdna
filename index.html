@@ -1,0 +1,30 @@
+<html>
+  <head>
+    <script src='http://cwilso.github.com/WebMIDIAPIShim/WebMIDIAPI.js'></script>
+    <script>
+      var m = null;   // m = MIDIAccess object for you to make calls on
+      var i = null;   // i = MIDIInput
+
+      setTimeout(function(){ navigator.requestMIDIAccess(success, error) }, 200);
+      
+      function success(access) {
+        m = access;
+
+        var inputs = m.enumerateInputs();
+        var outputs = m.enumerateOutputs();
+        i = m.getInput(inputs[0]);
+
+        i.onmessage = function (event) {
+          console.log(event);
+        }
+      }
+
+      function error(access) {
+        // no-op
+      }
+    </script>
+  </head>
+  <body>
+    Test!
+  </body>
+</html>
