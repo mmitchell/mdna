@@ -20,6 +20,13 @@ function success(access) {
   i.onmessage = function (event) {
     output.send( event.data );
     keys_down[event.data[1]] = event.data[2];
+    update_master_key(event);
+  }
+
+}
+
+function update_master_key(event){
+  if(!is_same_note_down_elsewhere(event.data[1])){
     if(event.data[2] === 0){
       master_key[event.data[1]%12].attr("opacity", 0.5)
                                   .g.remove();
@@ -29,7 +36,15 @@ function success(access) {
                                       .glow({color: "#FFF"});
     }
   }
+}
 
+function is_same_note_down_elsewhere(note){
+  for(var i=note%12; i<88; i=i+12){
+    if(keys_down[i] > 0 && i != note){
+      return true;
+    }
+  }
+  return false;
 }
 
 function error(access) {
