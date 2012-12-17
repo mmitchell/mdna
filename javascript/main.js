@@ -1,6 +1,20 @@
 var m = null;   // m = MIDIAccess object for you to make calls on
 var i = null;   // i = MIDIInput
 
+MidiEvent = (function (){
+  function MidiEvent(event){
+    this.type = event.data[0];
+    this.note = event.data[1];
+    this.velocity = event.data[2];
+  }
+
+  MidiEvent.prototype.masterKeyPosition = function(){
+    this.note % 12;
+  };
+
+  return MidiEvent;
+})();
+
 setTimeout(function(){ navigator.requestMIDIAccess(success, error) }, 200);
 
 //Globals (I know...)
@@ -22,11 +36,13 @@ function success(access) {
 
   var inputs = m.enumerateInputs();
   i = m.getInput(inputs[0]);
-  i.onmessage = function (event) {
-    output.send( event.data );
+  i.onmessage = function (_event) {
+    output.send( _event.data );
+
+    var event = new MidiEvent(_event);
     // Check for double key downs
-    if(keys_down[event.data[1]] !== event.data[2]){
-      keys_down[event.data[1]] = event.data[2];
+    if(keys_down[event.note] !== event.velocity){
+      keys_down[event.note] = event.velocity;
       update_master_key(event);
     }
   }
@@ -37,14 +53,14 @@ function error(access) {
 }
 
 function update_master_key(event){
-  if(!is_same_note_down_elsewhere(event.data[1])){
+  if(!is_same_note_down_elsewhere(event.note)){
     if(is_note_up(event)){
-      master_key[event.data[1]%12].data("note", "up")
+      master_key[event.note%12].data("note", "up")
                                   .attr("opacity", 0.35)
                                   .g.remove();
 
     } else {
-      master_key[event.data[1]%12].g = master_key[event.data[1]%12]
+      master_key[event.note%12].g = master_key[event.note%12]
                                       .data("note", "down")
                                       .attr("opacity", 1.0)
                                       .glow({color: "#FFF"});
@@ -67,8 +83,8 @@ function update_master_key(event){
 // some use the proper keyup command while others
 // use a keydown with zero velocity to mean keyup.
 function is_note_up(event){
-  if(event.data[2] === 0) return true; // Velocity is zero
-  if(event.data[0] >= 128 && event.data[0] <= 143) return true; // Note-off/keyup command given
+  if(event.velocity === 0) return true;
+  if(event.type >= 128 && event.type <= 143) return true; // Note-off/keyup command given
   return false; // Probably a keydown
 }
 
