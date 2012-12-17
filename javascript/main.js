@@ -21,9 +21,12 @@ function success(access) {
     output.send( event.data );
     keys_down[event.data[1]] = event.data[2];
     if(event.data[2] === 0){
-      master_key[event.data[1]%12].attr("opacity", 0.5);
+      master_key[event.data[1]%12].attr("opacity", 0.5)
+                                  .g.remove();
     } else {
-      master_key[event.data[1]%12].attr("opacity", 1.0);
+      master_key[event.data[1]%12].g = master_key[event.data[1]%12]
+                                      .attr("opacity", 1.0)
+                                      .glow({color: "#FFF"});
     }
   }
 
@@ -34,15 +37,16 @@ function error(access) {
 }
 
 setTimeout( function game(){
-  var WIDTH = 900;
-  var HEIGHT = 500;
+  var WIDTH = 600;
+  var HEIGHT = 400;
   var RADIUS = 150;
+  var NODE_COLOR = "#1090B3";
   var mdna = Raphael(50, 50, WIDTH, HEIGHT);
   master_key.forEach(function(ele, idx, arr){
     x = RADIUS*Math.sin(2*Math.PI*(idx/12));
     y = -RADIUS*Math.cos(2*Math.PI*(idx/12));
     arr[idx] = mdna.circle(x + WIDTH/2, y + HEIGHT/2, 20);
-    arr[idx].attr({fill: "#1090B3",
+    arr[idx].attr({fill: NODE_COLOR,
                    stroke: "#ffffff",
                    "stroke-width": 6,
                    opacity: .5
