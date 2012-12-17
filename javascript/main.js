@@ -12,6 +12,14 @@ MidiEvent = (function() {
     return this.note % 12;
   };
 
+  // Not all midi-keyboards adhere to the spec;
+  // some use the proper keyup command while others
+  // use a keydown with zero velocity to mean keyup.
+  MidiEvent.prototype.isNoteUp = function() {
+    return this.velocity === 0 ||
+      (this.type >= 128 && this.type <= 143);
+  }
+
   return MidiEvent;
 })();
 
@@ -87,7 +95,7 @@ function error(access) {
 
 function update_master_key(event){
   if(!is_same_note_down_elsewhere(event.note)){
-    if(is_note_up(event)){
+    if(event.isNoteUp()){
       master_key[event.note.position()].data("note", "up")
                                   .attr("opacity", 0.35)
                                   .g.remove();
@@ -110,15 +118,6 @@ function update_master_key(event){
       interval_index++;
     }
   }
-}
-
-// Not all midi-keyboards adhere to the spec;
-// some use the proper keyup command while others
-// use a keydown with zero velocity to mean keyup.
-function is_note_up(event){
-  if(event.velocity === 0) return true;
-  if(event.type >= 128 && event.type <= 143) return true; // Note-off/keyup command given
-  return false; // Probably a keydown
 }
 
 function is_same_note_down_elsewhere(note){
