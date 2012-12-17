@@ -113,10 +113,8 @@ setTimeout( function game_setup(){
   var interval_index = 0;
   for(var i=0; i<12; i++){
     for(var j=0; j<i; j++){
-      intervals[interval_index] = mdna.path("M" + node_position(i).x + 
-                                            "," + node_position(i).y + 
-                                            "L" + node_position(j).x + 
-                                            "," + node_position(j).y);
+      intervals[interval_index] = mdna.path("M" + node_position(i).x + "," + node_position(i).y + 
+                                            "L" + node_position(j).x + "," + node_position(j).y);
       intervals[interval_index].attr({fill: NODE_COLOR,
                                       stroke: "#ffffff",
                                       "stroke-width": 3,
