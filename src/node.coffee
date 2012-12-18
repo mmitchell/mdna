@@ -2,7 +2,7 @@ module.exports = class Node
 
   constructor: ({@x, @y, @position}) ->
 
-    @down = false
+    @down = 0
 
   init: (g) ->
 
@@ -15,7 +15,7 @@ module.exports = class Node
 
   draw: ->
 
-    if @down
+    if @down > 0
       @circle.attr('opacity', 1.0)
       @g ?= @circle.glow color: "#FFF"
 
@@ -23,6 +23,6 @@ module.exports = class Node
       @circle.attr('opacity', 0.35)
       @g?.remove()
 
-  off: -> @down = false
+  off: -> @down -= 1
 
-  on: -> @down = true
+  on: -> @down += 1

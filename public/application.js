@@ -294,7 +294,7 @@
 
     function Node(_arg) {
       this.x = _arg.x, this.y = _arg.y, this.position = _arg.position;
-      this.down = false;
+      this.down = 0;
     }
 
     Node.prototype.init = function(g) {
@@ -308,7 +308,7 @@
 
     Node.prototype.draw = function() {
       var _ref, _ref1;
-      if (this.down) {
+      if (this.down > 0) {
         this.circle.attr('opacity', 1.0);
         return (_ref = this.g) != null ? _ref : this.g = this.circle.glow({
           color: "#FFF"
@@ -320,11 +320,11 @@
     };
 
     Node.prototype.off = function() {
-      return this.down = false;
+      return this.down -= 1;
     };
 
     Node.prototype.on = function() {
-      return this.down = true;
+      return this.down += 1;
     };
 
     return Node;
