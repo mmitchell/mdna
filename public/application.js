@@ -67,9 +67,18 @@
 
     App.prototype.boot = function() {
       var _this = this;
-      this.masterKey = new MasterKey;
+      this.masterKey = new MasterKey({
+        x: 50,
+        y: 50
+      });
       this.masterKey.init();
       this.masterKey.draw();
+      this.masterKey2 = new MasterKey({
+        x: 500,
+        y: 50
+      });
+      this.masterKey2.init();
+      this.masterKey2.draw();
       return setTimeout(function() {
         return navigator.requestMIDIAccess(_this.success, _this.error);
       }, 200);
@@ -77,11 +86,12 @@
 
     App.prototype.success = function(access) {
       var _this = this;
-      this.midiAccess = new MidiManager(access);
-      return this.midiAccess.onMessage(function(event) {
+      this.midiManager = new MidiManager(access);
+      return this.midiManager.onMessage(function(event) {
         if (keys_down[event.note.num] !== event.velocity) {
           keys_down[event.note.num] = event.velocity;
-          return _this.masterKey.update(event);
+          _this.masterKey.update(event);
+          return _this.masterKey2.update(event);
         }
       });
     };
@@ -158,8 +168,9 @@
 
     MasterKey.prototype.NODE_COLOR = "#1090B3";
 
-    function MasterKey(opts) {
+    function MasterKey(_arg) {
       var _this = this;
+      this.x = _arg.x, this.y = _arg.y;
       this.nodes = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map(function(i) {
         return new Node({
           x: _this.RADIUS * Math.sin(2 * Math.PI * (i / 12)) + _this.WIDTH / 2,
@@ -172,7 +183,7 @@
 
     MasterKey.prototype.init = function() {
       var g, interval, node, _i, _j, _len, _len1, _ref, _ref1, _results;
-      g = Raphael(50, 50, this.WIDTH, this.HEIGHT);
+      g = Raphael(this.x, this.y, this.WIDTH, this.HEIGHT);
       _ref = this.intervals;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         interval = _ref[_i];

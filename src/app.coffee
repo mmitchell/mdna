@@ -7,11 +7,13 @@ module.exports = class App
 
   boot: ->
 
-    @masterKey = new MasterKey
-
+    @masterKey = new MasterKey x: 50, y: 50
     @masterKey.init()
-
     @masterKey.draw()
+
+    @masterKey2 = new MasterKey x: 500, y: 50
+    @masterKey2.init()
+    @masterKey2.draw()
 
     setTimeout =>
       navigator.requestMIDIAccess @success, @error
@@ -19,15 +21,16 @@ module.exports = class App
 
   success: (access) =>
 
-    @midiAccess = new MidiManager access
+    @midiManager = new MidiManager access
 
-    @midiAccess.onMessage (event) =>
+    @midiManager.onMessage (event) =>
 
       if keys_down[event.note.num] isnt event.velocity
 
         keys_down[event.note.num] = event.velocity
 
         @masterKey.update event
+        @masterKey2.update event
 
   error: ->
 

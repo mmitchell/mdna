@@ -8,7 +8,7 @@ module.exports = class MasterKey
   HEIGHT: 400
   NODE_COLOR: "#1090B3"
 
-  constructor: (opts) ->
+  constructor: ({@x, @y}) ->
 
     @nodes = [0...12].map (i) =>
       new Node
@@ -20,7 +20,7 @@ module.exports = class MasterKey
 
   init: ->
 
-    g = Raphael 50, 50, @WIDTH, @HEIGHT
+    g = Raphael @x, @y, @WIDTH, @HEIGHT
 
     interval.init g for interval in @intervals
     node.init g for node in @nodes
