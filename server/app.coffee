@@ -1,16 +1,10 @@
 io = require('socket.io').listen(8000)
 
-players = {}
+io.sockets.on 'connection', (socket) ->
 
-io.sockets.on 'joinSession', (guid) ->
+  socket.on 'notePlayed', (guid, event) ->
 
-  players[guid] = true
-
-io.sockets.on 'notePlayed', (guid, event) ->
-
-  io.sockets.emit 'playNote',
-    guid: guid,
-    event: event
+    socket.emit 'playNote', guid, event
 
 # var io = require('socket.io').listen(80);
 

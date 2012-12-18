@@ -14,3 +14,7 @@ module.exports = class MidiEvent
   isNoteUp: ->
 
     @velocity is 0 or (128 <= @type <= 143)
+
+  rawData: ->
+
+    [@type, @note, @velocity]

@@ -46,10 +46,8 @@ module.exports = class App
 
     @socket = io.connect('http://localhost:8000')
 
-    @socket.emit 'joinSession', @guid
-
-    @socket.on 'playNote', (guid, event) ->
+    @socket.on 'playNote', (guid, event) =>
 
       return if guid is @guid
 
-      @midiManager.output.play event
+      @midiManager.output.send event.rawData()

@@ -102,14 +102,14 @@
     };
 
     App.prototype.connect = function() {
+      var _this = this;
       this.guid = Math.floor(Math.random() * 100);
       this.socket = io.connect('http://localhost:8000');
-      this.socket.emit('joinSession', this.guid);
       return this.socket.on('playNote', function(guid, event) {
-        if (guid === this.guid) {
+        if (guid === _this.guid) {
           return;
         }
-        return this.midiManager.output.play(event);
+        return _this.midiManager.output.send(event.rawData());
       });
     };
 
@@ -271,6 +271,10 @@
     MidiEvent.prototype.isNoteUp = function() {
       var _ref;
       return this.velocity === 0 || ((128 <= (_ref = this.type) && _ref <= 143));
+    };
+
+    MidiEvent.prototype.rawData = function() {
+      return [this.type, this.note, this.velocity];
     };
 
     return MidiEvent;
