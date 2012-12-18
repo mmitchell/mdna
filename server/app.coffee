@@ -1,14 +1,10 @@
 io = require('socket.io').listen(8000)
 
-@mySocket = null
-
 io.sockets.on 'connection', (socket) =>
 
-  @mySocket = socket
+  socket.on 'notePlayed', (guid, event) =>
 
-  @mySocket.on 'notePlayed', (guid, event) =>
-
-    @mySocket.emit 'playNote', guid, event
+    io.sockets.emit 'playNote', guid, event
 
 # var io = require('socket.io').listen(80);
 
