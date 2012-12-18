@@ -1,5 +1,6 @@
 MasterKey = require './master_key'
 MidiManager = require './midi_manager'
+MidiEvent = require './midi_event'
 
 keys_down = new Array(88).join('0').split('').map(parseFloat)
 
@@ -46,8 +47,12 @@ module.exports = class App
 
     @socket = io.connect('http://localhost:8000')
 
-    @socket.on 'playNote', (guid, event) =>
+    @socket.on 'playNote', (guid, _event) =>
 
       return if guid is @guid
 
+      event = MidiEvent.initFromObject _event
+
       @midiManager.output.send event.rawData()
+
+      @masterKey2.update event

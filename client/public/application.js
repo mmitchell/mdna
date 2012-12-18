@@ -49,12 +49,14 @@
   return this.require.define;
 }).call(this)({
   "app": function(exports, require, module) {(function() {
-  var App, MasterKey, MidiManager, keys_down,
+  var App, MasterKey, MidiEvent, MidiManager, keys_down,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
   MasterKey = require('./master_key');
 
   MidiManager = require('./midi_manager');
+
+  MidiEvent = require('./midi_event');
 
   keys_down = new Array(88).join('0').split('').map(parseFloat);
 
@@ -105,11 +107,14 @@
       var _this = this;
       this.guid = Math.floor(Math.random() * 100);
       this.socket = io.connect('http://localhost:8000');
-      return this.socket.on('playNote', function(guid, event) {
+      return this.socket.on('playNote', function(guid, _event) {
+        var event;
         if (guid === _this.guid) {
           return;
         }
-        return _this.midiManager.output.send(event.rawData());
+        event = MidiEvent.initFromObject(_event);
+        _this.midiManager.output.send(event.rawData());
+        return _this.masterKey2.update(event);
       });
     };
 
@@ -262,6 +267,12 @@
 
   module.exports = MidiEvent = (function() {
 
+    MidiEvent.initFromObject = function(obj) {
+      return new MidiEvent({
+        data: [obj.type, obj.note.num, obj.velocity]
+      });
+    };
+
     function MidiEvent(event) {
       this.type = event.data[0];
       this.note = new Note(event.data[1]);
@@ -274,7 +285,7 @@
     };
 
     MidiEvent.prototype.rawData = function() {
-      return [this.type, this.note, this.velocity];
+      return [this.type, this.note.num, this.velocity];
     };
 
     return MidiEvent;

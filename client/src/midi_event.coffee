@@ -2,6 +2,11 @@ Note = require './note'
 
 module.exports = class MidiEvent
 
+  @initFromObject: (obj) ->
+
+    new MidiEvent
+      data: [obj.type, obj.note.num, obj.velocity]
+
   constructor: (event) ->
 
     @type = event.data[0]
@@ -17,4 +22,4 @@ module.exports = class MidiEvent
 
   rawData: ->
 
-    [@type, @note, @velocity]
+    [@type, @note.num, @velocity]
