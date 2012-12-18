@@ -49,7 +49,7 @@
   return this.require.define;
 }).call(this)({
   "main": function(exports, require, module) {(function() {
-  var App, MasterKey, MidiEvent, error, gameSetup, i, interval_color, is_same_note_down_elsewhere, keys_down, m, masterKey, success, update_master_key;
+  var App, MasterKey, MidiEvent, error, i, interval_color, is_same_note_down_elsewhere, keys_down, m, masterKey, success, update_master_key;
 
   MidiEvent = require('./midi_event');
 
@@ -142,17 +142,11 @@
     return colors[dist - 1];
   };
 
-  gameSetup = function() {
-    masterKey = new MasterKey;
-    return masterKey.draw();
-  };
-
   module.exports = App = (function() {
 
     function App() {}
 
     App.prototype.boot = function() {
-      gameSetup();
       masterKey = new MasterKey;
       masterKey.draw();
       return setTimeout(function() {
@@ -294,12 +288,14 @@
 
     Node.prototype.off = function() {
       this.down = false;
-      return this.circle.attr("opacity", 0.35);
+      this.circle.attr('opacity', 0.35);
+      return this.g.remove();
     };
 
     Node.prototype.on = function() {
       this.down = true;
-      return this.circle.attr("opacity", 1.0).glow({
+      this.circle.attr('opacity', 1.0);
+      return this.g = this.circle.glow({
         color: "#FFF"
       });
     };

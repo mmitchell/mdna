@@ -65,18 +65,9 @@ interval_color = (note_1, note_2) ->
   colors = ["#bf001c", "#bf5600", "#bfac00", "#00bf85", "#00a2bf", "#5f00bf"]
   colors[dist - 1]
 
-gameSetup = ->
-
-  masterKey = new MasterKey
-
-  masterKey.draw()
-
-
 module.exports = class App
 
   boot: ->
-
-    gameSetup()
 
     masterKey = new MasterKey
 

@@ -20,10 +20,14 @@ module.exports = class Node
 
     @down = false
 
-    @circle.attr("opacity", 0.35)
+    @circle.attr('opacity', 0.35)
+
+    @g.remove()
 
   on: ->
 
     @down = true
 
-    @circle.attr("opacity", 1.0).glow(color: "#FFF")
+    @circle.attr('opacity', 1.0)
+
+    @g = @circle.glow(color: "#FFF")
