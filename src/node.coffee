@@ -1,37 +1,28 @@
 module.exports = class Node
 
-  COLOR: "#1090B3"
-
-  constructor: ({@x, @y}) ->
-
-  draw: (g) ->
-
-    @circle = g.circle @x, @y, 20
+  constructor: ({@x, @y, @position}) ->
 
     @down = false
 
-    @circle.attr
-      fill: @COLOR
-      stroke: "#ffffff"
-      "stroke-width": 6
-      opacity: 0.35
+  init: (g) ->
 
-  off: ->
+    @circle = g.circle(@x, @y, 20)
+               .attr
+                 fill: "#1090B3"
+                 stroke: "#ffffff"
+                 "stroke-width": 6
+                 opacity: 0.35
 
-    return unless @down
+  draw: ->
 
-    @down = false
+    if @down
+      @circle.attr('opacity', 1.0)
+      @g ?= @circle.glow color: "#FFF"
 
-    @circle.attr('opacity', 0.35)
+    else
+      @circle.attr('opacity', 0.35)
+      @g?.remove()
 
-    @g.remove()
+  off: -> @down = false
 
-  on: ->
-
-    return if @down
-
-    @down = true
-
-    @circle.attr('opacity', 1.0)
-
-    @g = @circle.glow(color: "#FFF")
+  on: -> @down = true

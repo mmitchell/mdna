@@ -48,8 +48,53 @@
   }
   return this.require.define;
 }).call(this)({
-  "main": function(exports, require, module) {(function() {
-  var App, MasterKey, MidiEvent, error, i, interval_color, keys_down, m, masterKey, success, update_master_key;
+  "interval": function(exports, require, module) {(function() {
+  var Interval;
+
+  module.exports = Interval = (function() {
+
+    function Interval(n1, n2) {
+      this.n1 = n1;
+      this.n2 = n2;
+    }
+
+    Interval.prototype.init = function(g) {
+      return this.line = g.path("M" + this.n1.x + "," + this.n1.y + "L" + this.n2.x + "," + this.n2.y);
+    };
+
+    Interval.prototype.draw = function(g) {
+      if (this.n1.down && this.n2.down) {
+        return this.line.attr({
+          opacity: 1.0,
+          stroke: this.color(),
+          'stroke-width': 3
+        });
+      } else {
+        return this.line.attr({
+          opacity: 0.15,
+          stroke: "#ffffff",
+          'stroke-width': 3
+        });
+      }
+    };
+
+    Interval.prototype.color = function() {
+      var colors, dist;
+      dist = Math.abs(this.n1.position - this.n2.position);
+      if (dist > 6) {
+        dist = 12 - dist;
+      }
+      colors = ["#bf001c", "#bf5600", "#bfac00", "#00bf85", "#00a2bf", "#5f00bf"];
+      return colors[dist - 1];
+    };
+
+    return Interval;
+
+  })();
+
+}).call(this);
+}, "main": function(exports, require, module) {(function() {
+  var App, MasterKey, MidiEvent, error, i, keys_down, m, masterKey, success, update_master_key;
 
   MidiEvent = require('./midi_event');
 
@@ -88,46 +133,12 @@
   };
 
   update_master_key = function(event) {
-    var interval_index, j, _i, _results;
     if (event.isNoteUp()) {
       masterKey.nodes[event.note.position()].off();
     } else {
       masterKey.nodes[event.note.position()].on();
     }
-    interval_index = 0;
-    _results = [];
-    for (i = _i = 0; _i < 12; i = ++_i) {
-      _results.push((function() {
-        var _j, _results1;
-        _results1 = [];
-        for (j = _j = 0; 0 <= i ? _j < i : _j > i; j = 0 <= i ? ++_j : --_j) {
-          if (masterKey.nodes[i].down && masterKey.nodes[j].down) {
-            masterKey.intervals[interval_index].attr({
-              opacity: 1.0,
-              stroke: interval_color(i, j)
-            });
-          } else {
-            masterKey.intervals[interval_index].attr({
-              opacity: 0.15,
-              stroke: "#ffffff"
-            });
-          }
-          _results1.push(interval_index++);
-        }
-        return _results1;
-      })());
-    }
-    return _results;
-  };
-
-  interval_color = function(note_1, note_2) {
-    var colors, dist;
-    dist = Math.abs(note_1 - note_2);
-    if (dist > 6) {
-      dist = 12 - dist;
-    }
-    colors = ["#bf001c", "#bf5600", "#bfac00", "#00bf85", "#00a2bf", "#5f00bf"];
-    return colors[dist - 1];
+    return masterKey.draw();
   };
 
   module.exports = App = (function() {
@@ -136,6 +147,7 @@
 
     App.prototype.boot = function() {
       masterKey = new MasterKey;
+      masterKey.init();
       masterKey.draw();
       return setTimeout(function() {
         return navigator.requestMIDIAccess(success, error);
@@ -148,9 +160,11 @@
 
 }).call(this);
 }, "master_key": function(exports, require, module) {(function() {
-  var MasterKey, Node;
+  var Interval, MasterKey, Node;
 
   Node = require('./node');
+
+  Interval = require('./interval');
 
   module.exports = MasterKey = (function() {
 
@@ -165,53 +179,60 @@
     function MasterKey(opts) {
       var _this = this;
       this.g = Raphael(50, 50, this.WIDTH, this.HEIGHT);
-      this.intervals = new Array(66).join('0').split('').map(parseFloat);
       this.nodes = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map(function(i) {
         return new Node({
           x: _this.RADIUS * Math.sin(2 * Math.PI * (i / 12)) + _this.WIDTH / 2,
-          y: -_this.RADIUS * Math.cos(2 * Math.PI * (i / 12)) + _this.HEIGHT / 2
+          y: -_this.RADIUS * Math.cos(2 * Math.PI * (i / 12)) + _this.HEIGHT / 2,
+          position: i
         });
       });
+      this.intervals = this.makeIntervals();
     }
 
-    MasterKey.prototype.draw = function() {
-      this.drawLines();
-      return this.drawCircles();
-    };
-
-    MasterKey.prototype.drawLines = function() {
-      var a, b, i, interval_index, j, _i, _results;
-      interval_index = 0;
-      _results = [];
-      for (i = _i = 0; _i < 12; i = ++_i) {
-        _results.push((function() {
-          var _j, _ref, _results1;
-          _results1 = [];
-          for (j = _j = 0; 0 <= i ? _j < i : _j > i; j = 0 <= i ? ++_j : --_j) {
-            _ref = [this.nodes[i], this.nodes[j]], a = _ref[0], b = _ref[1];
-            this.intervals[interval_index] = this.g.path("M" + a.x + "," + a.y + "L" + b.x + "," + b.y);
-            this.intervals[interval_index].attr({
-              stroke: "#ffffff",
-              "stroke-width": 3,
-              opacity: 0.15
-            });
-            _results1.push(interval_index++);
-          }
-          return _results1;
-        }).call(this));
-      }
-      return _results;
-    };
-
-    MasterKey.prototype.drawCircles = function() {
-      var node, _i, _len, _ref, _results;
-      _ref = this.nodes;
-      _results = [];
+    MasterKey.prototype.init = function() {
+      var interval, node, _i, _j, _len, _len1, _ref, _ref1, _results;
+      _ref = this.intervals;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        node = _ref[_i];
-        _results.push(node.draw(this.g));
+        interval = _ref[_i];
+        interval.init(this.g);
+      }
+      _ref1 = this.nodes;
+      _results = [];
+      for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+        node = _ref1[_j];
+        _results.push(node.init(this.g));
       }
       return _results;
+    };
+
+    MasterKey.prototype.draw = function() {
+      var interval, node, _i, _j, _len, _len1, _ref, _ref1, _results;
+      _ref = this.intervals;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        interval = _ref[_i];
+        interval.draw();
+      }
+      _ref1 = this.nodes;
+      _results = [];
+      for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+        node = _ref1[_j];
+        _results.push(node.draw());
+      }
+      return _results;
+    };
+
+    MasterKey.prototype.makeIntervals = function() {
+      var i, ints, j, _i, _j;
+      if (this.nodes == null) {
+        throw "Nodes must be constructed first!";
+      }
+      ints = [];
+      for (i = _i = 0; _i < 12; i = ++_i) {
+        for (j = _j = 0; 0 <= i ? _j < i : _j > i; j = 0 <= i ? ++_j : --_j) {
+          ints.push(new Interval(this.nodes[i], this.nodes[j]));
+        }
+      }
+      return ints;
     };
 
     return MasterKey;
@@ -247,41 +268,39 @@
 
   module.exports = Node = (function() {
 
-    Node.prototype.COLOR = "#1090B3";
-
     function Node(_arg) {
-      this.x = _arg.x, this.y = _arg.y;
+      this.x = _arg.x, this.y = _arg.y, this.position = _arg.position;
+      this.down = false;
     }
 
-    Node.prototype.draw = function(g) {
-      this.circle = g.circle(this.x, this.y, 20);
-      this.down = false;
-      return this.circle.attr({
-        fill: this.COLOR,
+    Node.prototype.init = function(g) {
+      return this.circle = g.circle(this.x, this.y, 20).attr({
+        fill: "#1090B3",
         stroke: "#ffffff",
         "stroke-width": 6,
         opacity: 0.35
       });
     };
 
-    Node.prototype.off = function() {
-      if (!this.down) {
-        return;
+    Node.prototype.draw = function() {
+      var _ref, _ref1;
+      if (this.down) {
+        this.circle.attr('opacity', 1.0);
+        return (_ref = this.g) != null ? _ref : this.g = this.circle.glow({
+          color: "#FFF"
+        });
+      } else {
+        this.circle.attr('opacity', 0.35);
+        return (_ref1 = this.g) != null ? _ref1.remove() : void 0;
       }
-      this.down = false;
-      this.circle.attr('opacity', 0.35);
-      return this.g.remove();
+    };
+
+    Node.prototype.off = function() {
+      return this.down = false;
     };
 
     Node.prototype.on = function() {
-      if (this.down) {
-        return;
-      }
-      this.down = true;
-      this.circle.attr('opacity', 1.0);
-      return this.g = this.circle.glow({
-        color: "#FFF"
-      });
+      return this.down = true;
     };
 
     return Node;

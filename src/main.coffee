@@ -33,26 +33,7 @@ update_master_key = (event) ->
   else
     masterKey.nodes[event.note.position()].on()
 
-  interval_index = 0
-
-  for i in [0...12]
-    for j in [0...i]
-      if masterKey.nodes[i].down and masterKey.nodes[j].down
-        masterKey.intervals[interval_index].attr
-          opacity: 1.0
-          stroke: interval_color(i, j)
-      else
-        masterKey.intervals[interval_index].attr
-          opacity: 0.15
-          stroke: "#ffffff"
-
-      interval_index++
-
-interval_color = (note_1, note_2) ->
-  dist = Math.abs(note_1 - note_2)
-  dist = 12 - dist  if dist > 6
-  colors = ["#bf001c", "#bf5600", "#bfac00", "#00bf85", "#00a2bf", "#5f00bf"]
-  colors[dist - 1]
+  masterKey.draw()
 
 module.exports = class App
 
@@ -60,10 +41,10 @@ module.exports = class App
 
     masterKey = new MasterKey
 
+    masterKey.init()
+
     masterKey.draw()
 
     setTimeout ->
       navigator.requestMIDIAccess(success, error)
     , 200
-
-  
