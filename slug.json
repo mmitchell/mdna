@@ -9,5 +9,5 @@
 
   "libs": [],
 
-  "dependencies": ["raphael"]
+  "dependencies": []
 }

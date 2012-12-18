@@ -1,15 +1,12 @@
 MidiEvent = require './midi_event'
+MasterKey = require './master_key'
 
 #Globals (I know...)
 m = null
 i = null
-WIDTH = 600
-HEIGHT = 400
-RADIUS = 150
-NODE_COLOR = "#1090B3"
+masterKey = null
+
 keys_down = new Array(88).join('0').split('').map(parseFloat)
-intervals = new Array(66).join('0').split('').map(parseFloat)
-master_key = [0,0,0,0,0,0,0,0,0,0,0,0]
 
 success = (access) ->
   m = access
@@ -32,23 +29,20 @@ error = (access) ->
 update_master_key = (event) ->
   unless is_same_note_down_elsewhere(event.note)
     if event.isNoteUp()
-      master_key[event.note.position()].data("note", "up").attr("opacity", 0.35).g.remove()
+      masterKey.nodes[event.note.position()].off()
     else
-      master_key[event.note.position()].g = master_key[event.note.position()]
-                                                  .data("note", "down")
-                                                  .attr("opacity", 1.0)
-                                                  .glow(color: "#FFF")
+      masterKey.nodes[event.note.position()].on()
 
   interval_index = 0
 
   for i in [0...12]
     for j in [0...i]
-      intervals[interval_index].attr
+      masterKey.intervals[interval_index].attr
         opacity: 0.15
         stroke: "#ffffff"
 
-      if master_key[i].data("note") is "down" and master_key[j].data("note") is "down"
-        intervals[interval_index].attr
+      if masterKey.nodes[i].down and masterKey.nodes[j].down
+        masterKey.intervals[interval_index].attr
           opacity: 1.0
           stroke: interval_color(i, j)
 
@@ -71,48 +65,25 @@ interval_color = (note_1, note_2) ->
   colors = ["#bf001c", "#bf5600", "#bfac00", "#00bf85", "#00a2bf", "#5f00bf"]
   colors[dist - 1]
 
-node_position = (node_idx) ->
-  x = RADIUS * Math.sin(2 * Math.PI * (node_idx / 12)) + WIDTH / 2
-  y = -RADIUS * Math.cos(2 * Math.PI * (node_idx / 12)) + HEIGHT / 2
-  
-  { x: x, y: y }
-
 gameSetup = ->
 
-  mdna = Raphael 50, 50, WIDTH, HEIGHT
+  masterKey = new MasterKey
 
-  interval_index = 0
+  masterKey.draw()
 
-  for i in [0...12]
-    for j in [0...i]
-      intervals[interval_index] = mdna.path("M" + node_position(i).x + "," + node_position(i).y + 
-                                              "L" + node_position(j).x + "," + node_position(j).y)
-      intervals[interval_index].attr
-        fill: NODE_COLOR
-        stroke: "#ffffff"
-        "stroke-width": 3
-        opacity: 0.15
-
-      interval_index++
-
-      master_key.forEach (ele, idx, arr) ->
-        arr[idx] = mdna.circle node_position(idx).x, node_position(idx).y, 20
-
-        arr[idx].data("note", "up")
-                .attr
-                  fill: NODE_COLOR
-                  stroke: "#ffffff"
-                  "stroke-width": 6
-                  opacity: 0.35
 
 module.exports = class App
 
   boot: ->
 
+    gameSetup()
+
+    masterKey = new MasterKey
+
+    masterKey.draw()
+
     setTimeout ->
       navigator.requestMIDIAccess(success, error)
     , 200
+
   
-    setTimeout ->
-      gameSetup()
-    , 300
