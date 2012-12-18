@@ -178,7 +178,6 @@
 
     function MasterKey(opts) {
       var _this = this;
-      this.g = Raphael(50, 50, this.WIDTH, this.HEIGHT);
       this.nodes = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map(function(i) {
         return new Node({
           x: _this.RADIUS * Math.sin(2 * Math.PI * (i / 12)) + _this.WIDTH / 2,
@@ -190,17 +189,18 @@
     }
 
     MasterKey.prototype.init = function() {
-      var interval, node, _i, _j, _len, _len1, _ref, _ref1, _results;
+      var g, interval, node, _i, _j, _len, _len1, _ref, _ref1, _results;
+      g = Raphael(50, 50, this.WIDTH, this.HEIGHT);
       _ref = this.intervals;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         interval = _ref[_i];
-        interval.init(this.g);
+        interval.init(g);
       }
       _ref1 = this.nodes;
       _results = [];
       for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
         node = _ref1[_j];
-        _results.push(node.init(this.g));
+        _results.push(node.init(g));
       }
       return _results;
     };

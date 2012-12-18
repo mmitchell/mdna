@@ -10,8 +10,6 @@ module.exports = class MasterKey
 
   constructor: (opts) ->
 
-    @g = Raphael 50, 50, @WIDTH, @HEIGHT
-
     @nodes = [0...12].map (i) =>
       new Node
         x: @RADIUS * Math.sin(2 * Math.PI * (i / 12)) + @WIDTH / 2
@@ -22,8 +20,10 @@ module.exports = class MasterKey
 
   init: ->
 
-    interval.init @g for interval in @intervals
-    node.init @g for node in @nodes
+    g = Raphael 50, 50, @WIDTH, @HEIGHT
+
+    interval.init g for interval in @intervals
+    node.init g for node in @nodes
 
   draw: ->
 
