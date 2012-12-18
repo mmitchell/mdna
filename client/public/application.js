@@ -79,25 +79,38 @@
       });
       this.masterKey2.init();
       this.masterKey2.draw();
-      return setTimeout(function() {
+      setTimeout(function() {
         return navigator.requestMIDIAccess(_this.success, _this.error);
       }, 200);
+      return this.connect();
     };
 
     App.prototype.success = function(access) {
       var _this = this;
       this.midiManager = new MidiManager(access);
       return this.midiManager.onMessage(function(event) {
+        _this.socket.emit('notePlayed', _this.guid, event);
         if (keys_down[event.note.num] !== event.velocity) {
           keys_down[event.note.num] = event.velocity;
-          _this.masterKey.update(event);
-          return _this.masterKey2.update(event);
+          return _this.masterKey.update(event);
         }
       });
     };
 
     App.prototype.error = function() {
       return alert("We could not load a MIDI device. Please reload and we'll try again.");
+    };
+
+    App.prototype.connect = function() {
+      this.guid = Math.floor(Math.random() * 100);
+      this.socket = io.connect('http://localhost:8000');
+      this.socket.emit('joinSession', this.guid);
+      return this.socket.on('playNote', function(guid, event) {
+        if (guid === this.guid) {
+          return;
+        }
+        return this.midiManager.output.play(event);
+      });
     };
 
     return App;

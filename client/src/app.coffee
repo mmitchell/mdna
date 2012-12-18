@@ -19,19 +19,37 @@ module.exports = class App
       navigator.requestMIDIAccess @success, @error
     , 200
 
+
+    @connect()
+
   success: (access) =>
 
     @midiManager = new MidiManager access
 
     @midiManager.onMessage (event) =>
 
+      @socket.emit 'notePlayed', @guid, event
+
       if keys_down[event.note.num] isnt event.velocity
 
         keys_down[event.note.num] = event.velocity
 
         @masterKey.update event
-        @masterKey2.update event
 
   error: ->
 
     alert "We could not load a MIDI device. Please reload and we'll try again."
+
+  connect: ->
+
+    @guid = Math.floor(Math.random()*100)
+
+    @socket = io.connect('http://localhost:8000')
+
+    @socket.emit 'joinSession', @guid
+
+    @socket.on 'playNote', (guid, event) ->
+
+      return if guid is @guid
+
+      @midiManager.output.play event
