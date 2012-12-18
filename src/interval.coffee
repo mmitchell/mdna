@@ -1,5 +1,14 @@
 module.exports = class Interval
 
+  COLORS: [
+    "#BF001C", # red
+    "#BF5600", # orange
+    "#BFAC00", # yellow
+    "#00BF85", # green
+    "#00A2BF", # blue
+    "#5F00BF"  # purple
+  ]
+
   constructor: (@n1, @n2) ->
 
   init: (g) ->
@@ -22,5 +31,4 @@ module.exports = class Interval
   color: ->
     dist = Math.abs(@n1.position - @n2.position)
     dist = 12 - dist if dist > 6
-    colors = ["#bf001c", "#bf5600", "#bfac00", "#00bf85", "#00a2bf", "#5f00bf"]
-    colors[dist - 1]
+    @COLORS[dist - 1]

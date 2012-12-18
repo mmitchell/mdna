@@ -53,6 +53,8 @@
 
   module.exports = Interval = (function() {
 
+    Interval.prototype.COLORS = ["#BF001C", "#BF5600", "#BFAC00", "#00BF85", "#00A2BF", "#5F00BF"];
+
     function Interval(n1, n2) {
       this.n1 = n1;
       this.n2 = n2;
@@ -79,13 +81,12 @@
     };
 
     Interval.prototype.color = function() {
-      var colors, dist;
+      var dist;
       dist = Math.abs(this.n1.position - this.n2.position);
       if (dist > 6) {
         dist = 12 - dist;
       }
-      colors = ["#bf001c", "#bf5600", "#bfac00", "#00bf85", "#00a2bf", "#5f00bf"];
-      return colors[dist - 1];
+      return this.COLORS[dist - 1];
     };
 
     return Interval;
