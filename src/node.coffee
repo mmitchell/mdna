@@ -18,6 +18,8 @@ module.exports = class Node
 
   off: ->
 
+    return unless @down
+
     @down = false
 
     @circle.attr('opacity', 0.35)
@@ -25,6 +27,8 @@ module.exports = class Node
     @g.remove()
 
   on: ->
+
+    return if @down
 
     @down = true
 

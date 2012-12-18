@@ -28,10 +28,12 @@ module.exports = class MasterKey
 
     for i in [0...12]
       for j in [0...i]
-        @intervals[interval_index] = @g.path("M" + @node_position(i).x + "," + @node_position(i).y + 
-                                                "L" + @node_position(j).x + "," + @node_position(j).y)
+        [a, b] = [@nodes[i], @nodes[j]]
+
+        @intervals[interval_index] = @g.path("M" + a.x + "," + a.y + 
+                                             "L" + b.x + "," + b.y)
+
         @intervals[interval_index].attr
-          fill: @NODE_COLOR
           stroke: "#ffffff"
           "stroke-width": 3
           opacity: 0.15
@@ -41,10 +43,3 @@ module.exports = class MasterKey
   drawCircles: ->
 
     node.draw @g for node in @nodes
-
-  node_position: (node_idx) ->
-
-    x = @RADIUS * Math.sin(2 * Math.PI * (node_idx / 12)) + @WIDTH / 2
-    y = -@RADIUS * Math.cos(2 * Math.PI * (node_idx / 12)) + @HEIGHT / 2
-    
-    { x: x, y: y }

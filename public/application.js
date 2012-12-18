@@ -49,7 +49,7 @@
   return this.require.define;
 }).call(this)({
   "main": function(exports, require, module) {(function() {
-  var App, MasterKey, MidiEvent, error, i, interval_color, is_same_note_down_elsewhere, keys_down, m, masterKey, success, update_master_key;
+  var App, MasterKey, MidiEvent, error, i, interval_color, keys_down, m, masterKey, success, update_master_key;
 
   MidiEvent = require('./midi_event');
 
@@ -89,12 +89,10 @@
 
   update_master_key = function(event) {
     var interval_index, j, _i, _results;
-    if (!is_same_note_down_elsewhere(event.note)) {
-      if (event.isNoteUp()) {
-        masterKey.nodes[event.note.position()].off();
-      } else {
-        masterKey.nodes[event.note.position()].on();
-      }
+    if (event.isNoteUp()) {
+      masterKey.nodes[event.note.position()].off();
+    } else {
+      masterKey.nodes[event.note.position()].on();
     }
     interval_index = 0;
     _results = [];
@@ -103,14 +101,15 @@
         var _j, _results1;
         _results1 = [];
         for (j = _j = 0; 0 <= i ? _j < i : _j > i; j = 0 <= i ? ++_j : --_j) {
-          masterKey.intervals[interval_index].attr({
-            opacity: 0.15,
-            stroke: "#ffffff"
-          });
           if (masterKey.nodes[i].down && masterKey.nodes[j].down) {
             masterKey.intervals[interval_index].attr({
               opacity: 1.0,
               stroke: interval_color(i, j)
+            });
+          } else {
+            masterKey.intervals[interval_index].attr({
+              opacity: 0.15,
+              stroke: "#ffffff"
             });
           }
           _results1.push(interval_index++);
@@ -119,17 +118,6 @@
       })());
     }
     return _results;
-  };
-
-  is_same_note_down_elsewhere = function(note) {
-    i = note.position();
-    while (i < 88) {
-      if (keys_down[i] > 0 && i !== note.num) {
-        return true;
-      }
-      i = i + 12;
-    }
-    return false;
   };
 
   interval_color = function(note_1, note_2) {
@@ -192,17 +180,17 @@
     };
 
     MasterKey.prototype.drawLines = function() {
-      var i, interval_index, j, _i, _results;
+      var a, b, i, interval_index, j, _i, _results;
       interval_index = 0;
       _results = [];
       for (i = _i = 0; _i < 12; i = ++_i) {
         _results.push((function() {
-          var _j, _results1;
+          var _j, _ref, _results1;
           _results1 = [];
           for (j = _j = 0; 0 <= i ? _j < i : _j > i; j = 0 <= i ? ++_j : --_j) {
-            this.intervals[interval_index] = this.g.path("M" + this.node_position(i).x + "," + this.node_position(i).y + "L" + this.node_position(j).x + "," + this.node_position(j).y);
+            _ref = [this.nodes[i], this.nodes[j]], a = _ref[0], b = _ref[1];
+            this.intervals[interval_index] = this.g.path("M" + a.x + "," + a.y + "L" + b.x + "," + b.y);
             this.intervals[interval_index].attr({
-              fill: this.NODE_COLOR,
               stroke: "#ffffff",
               "stroke-width": 3,
               opacity: 0.15
@@ -224,16 +212,6 @@
         _results.push(node.draw(this.g));
       }
       return _results;
-    };
-
-    MasterKey.prototype.node_position = function(node_idx) {
-      var x, y;
-      x = this.RADIUS * Math.sin(2 * Math.PI * (node_idx / 12)) + this.WIDTH / 2;
-      y = -this.RADIUS * Math.cos(2 * Math.PI * (node_idx / 12)) + this.HEIGHT / 2;
-      return {
-        x: x,
-        y: y
-      };
     };
 
     return MasterKey;
@@ -287,12 +265,18 @@
     };
 
     Node.prototype.off = function() {
+      if (!this.down) {
+        return;
+      }
       this.down = false;
       this.circle.attr('opacity', 0.35);
       return this.g.remove();
     };
 
     Node.prototype.on = function() {
+      if (this.down) {
+        return;
+      }
       this.down = true;
       this.circle.attr('opacity', 1.0);
       return this.g = this.circle.glow({
