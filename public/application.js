@@ -48,7 +48,54 @@
   }
   return this.require.define;
 }).call(this)({
-  "interval": function(exports, require, module) {(function() {
+  "app": function(exports, require, module) {(function() {
+  var App, MasterKey, MidiManager, keys_down,
+    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+
+  MasterKey = require('./master_key');
+
+  MidiManager = require('./midi_manager');
+
+  keys_down = new Array(88).join('0').split('').map(parseFloat);
+
+  module.exports = App = (function() {
+
+    function App() {
+      this.success = __bind(this.success, this);
+
+    }
+
+    App.prototype.boot = function() {
+      var _this = this;
+      this.masterKey = new MasterKey;
+      this.masterKey.init();
+      this.masterKey.draw();
+      return setTimeout(function() {
+        return navigator.requestMIDIAccess(_this.success, _this.error);
+      }, 200);
+    };
+
+    App.prototype.success = function(access) {
+      var _this = this;
+      this.midiAccess = new MidiManager(access);
+      return this.midiAccess.onMessage(function(event) {
+        if (keys_down[event.note.num] !== event.velocity) {
+          keys_down[event.note.num] = event.velocity;
+          return _this.masterKey.update(event);
+        }
+      });
+    };
+
+    App.prototype.error = function() {
+      return alert("We could not load a MIDI device. Please reload and we'll try again.");
+    };
+
+    return App;
+
+  })();
+
+}).call(this);
+}, "interval": function(exports, require, module) {(function() {
   var Interval;
 
   module.exports = Interval = (function() {
@@ -90,72 +137,6 @@
     };
 
     return Interval;
-
-  })();
-
-}).call(this);
-}, "main": function(exports, require, module) {(function() {
-  var App, MasterKey, MidiEvent, error, i, keys_down, m, masterKey, success, update_master_key;
-
-  MidiEvent = require('./midi_event');
-
-  MasterKey = require('./master_key');
-
-  m = null;
-
-  i = null;
-
-  masterKey = null;
-
-  keys_down = new Array(88).join('0').split('').map(parseFloat);
-
-  success = function(access) {
-    var inputs, output, outputs;
-    m = access;
-    outputs = m.enumerateOutputs();
-    if (outputs.length) {
-      output = m.getOutput(outputs[0]);
-    }
-    inputs = m.enumerateInputs();
-    i = m.getInput(inputs[0]);
-    return i.onmessage = function(_event) {
-      var event;
-      output.send(_event.data);
-      event = new MidiEvent(_event);
-      if (keys_down[event.note.num] !== event.velocity) {
-        keys_down[event.note.num] = event.velocity;
-        return update_master_key(event);
-      }
-    };
-  };
-
-  error = function(access) {
-    return console.log("MIDIAccess error.");
-  };
-
-  update_master_key = function(event) {
-    if (event.isNoteUp()) {
-      masterKey.nodes[event.note.position()].off();
-    } else {
-      masterKey.nodes[event.note.position()].on();
-    }
-    return masterKey.draw();
-  };
-
-  module.exports = App = (function() {
-
-    function App() {}
-
-    App.prototype.boot = function() {
-      masterKey = new MasterKey;
-      masterKey.init();
-      masterKey.draw();
-      return setTimeout(function() {
-        return navigator.requestMIDIAccess(success, error);
-      }, 200);
-    };
-
-    return App;
 
   })();
 
@@ -222,6 +203,15 @@
       return _results;
     };
 
+    MasterKey.prototype.update = function(event) {
+      if (event.isNoteUp()) {
+        this.nodes[event.note.position()].off();
+      } else {
+        this.nodes[event.note.position()].on();
+      }
+      return this.draw();
+    };
+
     MasterKey.prototype.makeIntervals = function() {
       var i, ints, j, _i, _j;
       if (this.nodes == null) {
@@ -260,6 +250,39 @@
     };
 
     return MidiEvent;
+
+  })();
+
+}).call(this);
+}, "midi_manager": function(exports, require, module) {(function() {
+  var MidiEvent, MidiManager;
+
+  MidiEvent = require('./midi_event');
+
+  module.exports = MidiManager = (function() {
+
+    function MidiManager(access) {
+      var inputs, outputs;
+      this.access = access;
+      outputs = this.access.enumerateOutputs();
+      if (outputs.length) {
+        this.output = this.access.getOutput(outputs[0]);
+      }
+      inputs = this.access.enumerateInputs();
+      if (inputs.length) {
+        this.input = this.access.getInput(inputs[0]);
+      }
+    }
+
+    MidiManager.prototype.onMessage = function(cb) {
+      var _this = this;
+      return this.input.onmessage = function(_event) {
+        _this.output.send(_event.data);
+        return cb(new MidiEvent(_event));
+      };
+    };
+
+    return MidiManager;
 
   })();
 

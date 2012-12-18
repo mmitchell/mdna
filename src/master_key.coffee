@@ -30,6 +30,15 @@ module.exports = class MasterKey
     interval.draw() for interval in @intervals
     node.draw() for node in @nodes
 
+  update: (event) ->
+
+    if event.isNoteUp()
+      @nodes[event.note.position()].off()
+    else
+      @nodes[event.note.position()].on()
+
+    @draw()
+
   makeIntervals: ->
 
     throw "Nodes must be constructed first!" unless @nodes?
