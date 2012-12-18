@@ -3,8 +3,9 @@ Note = require './note'
 module.exports = class MidiEvent
 
   constructor: (event) ->
+
     @type = event.data[0]
-    @note = new Note(event.data[1])
+    @note = new Note event.data[1]
     @velocity = event.data[2]
 
   # Not all midi-keyboards adhere to the spec;

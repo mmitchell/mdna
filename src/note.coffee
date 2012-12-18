@@ -1,6 +1,5 @@
 module.exports = class Note
 
-  constructor: (num) ->
-    @num = num
+  constructor: (@num) ->
 
   position: -> @num % 12

@@ -3780,11 +3780,9 @@
 	}
 })();
 }, "main": function(exports, require, module) {(function() {
-  var App, HEIGHT, MidiEvent, NODE_COLOR, R, RADIUS, WIDTH, error, gameSetup, i, interval_color, interval_index_mapper, intervals, is_same_note_down_elsewhere, keys_down, m, master_key, node_position, success, update_master_key;
+  var App, HEIGHT, MidiEvent, NODE_COLOR, RADIUS, WIDTH, error, gameSetup, i, interval_color, intervals, is_same_note_down_elsewhere, keys_down, m, master_key, node_position, success, update_master_key;
 
   MidiEvent = require('./midi_event');
-
-  R = require('raphael/raphael');
 
   m = null;
 
@@ -3829,7 +3827,7 @@
   };
 
   update_master_key = function(event) {
-    var interval_index, j, _results;
+    var interval_index, j, _i, _results;
     if (!is_same_note_down_elsewhere(event.note)) {
       if (event.isNoteUp()) {
         master_key[event.note.position()].data("note", "up").attr("opacity", 0.35).g.remove();
@@ -3840,25 +3838,26 @@
       }
     }
     interval_index = 0;
-    i = 0;
     _results = [];
-    while (i < 12) {
-      j = 0;
-      while (j < i) {
-        intervals[interval_index].attr({
-          opacity: 0.15,
-          stroke: "#ffffff"
-        });
-        if (master_key[i].data("note") === "down" && master_key[j].data("note") === "down") {
+    for (i = _i = 0; _i < 12; i = ++_i) {
+      _results.push((function() {
+        var _j, _results1;
+        _results1 = [];
+        for (j = _j = 0; 0 <= i ? _j < i : _j > i; j = 0 <= i ? ++_j : --_j) {
           intervals[interval_index].attr({
-            opacity: 1.0,
-            stroke: interval_color(i, j)
+            opacity: 0.15,
+            stroke: "#ffffff"
           });
+          if (master_key[i].data("note") === "down" && master_key[j].data("note") === "down") {
+            intervals[interval_index].attr({
+              opacity: 1.0,
+              stroke: interval_color(i, j)
+            });
+          }
+          _results1.push(interval_index++);
         }
-        interval_index++;
-        j++;
-      }
-      _results.push(i++);
+        return _results1;
+      })());
     }
     return _results;
   };
@@ -3872,13 +3871,6 @@
       i = i + 12;
     }
     return false;
-  };
-
-  interval_index_mapper = function(note_1, note_2) {
-    if (note_1 > note_2) {
-      return note_1 * 12 + note_2;
-    }
-    return note_2 * 12 + note_1;
   };
 
   interval_color = function(note_1, note_2) {

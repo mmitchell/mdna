@@ -1,5 +1,4 @@
 MidiEvent = require './midi_event'
-R = require 'raphael/raphael'
 
 #Globals (I know...)
 m = null
@@ -39,13 +38,11 @@ update_master_key = (event) ->
                                                   .data("note", "down")
                                                   .attr("opacity", 1.0)
                                                   .glow(color: "#FFF")
+
   interval_index = 0
-  i = 0
 
-  while i < 12
-    j = 0
-
-    while j < i
+  for i in [0...12]
+    for j in [0...i]
       intervals[interval_index].attr
         opacity: 0.15
         stroke: "#ffffff"
@@ -56,19 +53,17 @@ update_master_key = (event) ->
           stroke: interval_color(i, j)
 
       interval_index++
-      j++
-    i++
+
 is_same_note_down_elsewhere = (note) ->
+  # world's worst list comprehension
+  # (i for i in [note.position()...88] when i % 12 is note.position() and keys_down[i] > 0 and i isnt note.num).length > 0
+
   i = note.position()
 
   while i < 88
     return true  if keys_down[i] > 0 and i isnt note.num
     i = i + 12
   false
-
-interval_index_mapper = (note_1, note_2) ->
-  return note_1 * 12 + note_2  if note_1 > note_2
-  note_2 * 12 + note_1
 
 interval_color = (note_1, note_2) ->
   dist = Math.abs(note_1 - note_2)
