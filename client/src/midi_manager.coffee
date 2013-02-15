@@ -4,10 +4,10 @@ module.exports = class MidiManager
 
   constructor: (@access) ->
 
-    outputs = @access.enumerateOutputs()
+    outputs = @access.getOutputs()
     @output = @access.getOutput outputs[0] if outputs.length
 
-    inputs = @access.enumerateInputs()
+    inputs = @access.getInputs()
     @input = @access.getInput inputs[0] if inputs.length
 
   onMessage: (cb) ->
